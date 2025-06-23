@@ -76,11 +76,6 @@ foreach ($rows as $row) {
             margin-bottom: 20px;
             white-space: pre-wrap;
         }
-        .character {
-            text-align: center;
-            text-transform: uppercase;
-            margin: 30px 0 10px;
-        }
         .dialog {
             text-align: center;
             margin: 0 auto 20px;
@@ -89,6 +84,13 @@ foreach ($rows as $row) {
         }
         .checkbox-right {
             float: right;
+        }
+        .scene-heading.active {
+            background-color: #d4edda;
+            border-left: 4px solid #28a745;
+        }
+        .content-action.active, .dialog.active{
+            background:#d4edda
         }
     </style>
 </head>
@@ -102,28 +104,40 @@ foreach ($rows as $row) {
         <input type="hidden" name="script_id" value="<?= $script_id ?>">
 
         <?php foreach ($scenes as $scene_id => $scene): ?>
+            <?php
+                $total = count($scene['contents']);
+                $done = 0;
+                foreach ($scene['contents'] as $c) {
+                    if ($c['is_completed']) $done++;
+                }
+                $percentage = $total > 0 ? round(($done / $total) * 100) : 0;
+            ?>
             <div class="scene">
-                <div class="scene-heading">
-                    SCENE <?= $scene['scene_number'] ?> : <?= $scene['scene_title'] ?>
-                    <input type="checkbox" name="scene_done[<?= $scene_id ?>]" class="scene-checkbox" <?= $scene['is_completed'] ? 'checked' : '' ?>>
+                <div style="font-size: 0.9em; color: #666; margin-bottom: 8px;">
+                    ✅ <?= $done ?> dari <?= $total ?> selesai (<?= $percentage ?>%)
                 </div>
+
+                        <div class="scene-heading <?= $scene['is_completed'] ? 'active' : '' ?>" id="scene-heading-<?= $scene_id ?>">
+            <input type="checkbox" 
+                name="scene_done[<?= $scene_id ?>]" 
+                class="scene-checkbox" 
+                <?= $scene['is_completed'] ? 'checked' : '' ?>
+                data-scene-id="<?= $scene_id ?>">
+            SCENE <?= $scene['scene_number'] ?> : <?= $scene['scene_title'] ?>
+        </div>
+
+
 
                 <?php foreach ($scene['contents'] as $content): ?>
                     <?php if ($content['type'] === 'paragraph'): ?>
                         <div class="action">
                             <label>
                                 <input type="checkbox" name="content_done[<?= $content['id'] ?>]" <?= $content['is_completed'] ? 'checked' : '' ?>>
-                                <?= htmlspecialchars($content['text']) ?>
+                                <span class="content-action <?= $content['is_completed'] ? 'active' : '' ?>"><?= htmlspecialchars($content['text']) ?></span>
                             </label>
                         </div>
                     <?php elseif ($content['type'] === 'dialog'): ?>
-                        <div class="character">
-                            <label>
-                                <input type="checkbox" name="content_done[<?= $content['id'] ?>]" <?= $content['is_completed'] ? 'checked' : '' ?>>
-                                CHARACTER
-                            </label>
-                        </div>
-                        <div class="dialog"><?= htmlspecialchars($content['text']) ?></div>
+                        <div class="dialog <?= $content['is_completed'] ? 'active' : '' ?>"><input type="checkbox" name="content_done[<?= $content['id'] ?>]" <?= $content['is_completed'] ? 'checked' : '' ?>> <?= htmlspecialchars($content['text']) ?></div>
                     <?php endif; ?>
                 <?php endforeach; ?>
             </div>
