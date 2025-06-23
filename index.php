@@ -66,7 +66,7 @@ $scripts = $stmt->fetchAll();
             <?php foreach ($scripts as $script): ?>
                 <tr>
                     <td><?= htmlspecialchars($script['title']) ?></td>
-                    <td><a href="view_script_readonly.php?script_id=<?= $script['id'] ?>">Lihat</a></td>
+                    <td><a href="view_script_readonly.php?script_id=<?= $script['id'] ?>">Lihat</a> | <a href="delete_script.php?script_id=<?= $script['id'] ?>">Hapus</a></td>
                 </tr>
             <?php endforeach; ?>
         <?php else: ?>
