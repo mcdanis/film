@@ -46,14 +46,15 @@ $scripts = $stmt->fetchAll();
     </style>
 </head>
 <body>
+<?php
+    include('header.php');
+?>
 <h2>Tambah Script Baru</h2>
 <form action="add_script.php" method="post">
     Judul Script: <input type="text" name="title" required>
     <button type="submit">Mulai</button>
 </form>
-
-<h1>Daftar Skrip</h1>
-
+<h3>Daftar Skrip</h3>
 <table>
     <thead>
         <tr>
@@ -66,7 +67,10 @@ $scripts = $stmt->fetchAll();
             <?php foreach ($scripts as $script): ?>
                 <tr>
                     <td><?= htmlspecialchars($script['title']) ?></td>
-                    <td><a href="view_script_readonly.php?script_id=<?= $script['id'] ?>">Lihat</a> | <a href="delete_script.php?script_id=<?= $script['id'] ?>">Hapus</a></td>
+                    <td>
+                        <a href="view_script_readonly.php?script_id=<?= $script['id'] ?>">Lihat</a> |
+                        <a href="delete_script.php?script_id=<?= $script['id'] ?>" onclick="return confirm('Yakin ingin menghapus skrip ini?')">Hapus</a>
+                    </td>
                 </tr>
             <?php endforeach; ?>
         <?php else: ?>
@@ -74,6 +78,6 @@ $scripts = $stmt->fetchAll();
         <?php endif; ?>
     </tbody>
 </table>
-
+ 
 </body>
 </html>

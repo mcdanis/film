@@ -53,9 +53,16 @@ foreach ($rows as $row) {
 <head>
     <meta charset="UTF-8">
     <title>Script: <?= htmlspecialchars($script['title']) ?></title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
     <style>
+       
         body {
-            font-family: Courier, monospace;
+            font-family: "Courier Prime", monospace;
+            font-optical-sizing: auto;
+            font-weight: 400;
+            font-style: normal;
             background-color: #f5f5f5;
             padding: 40px;
         }
@@ -73,13 +80,14 @@ foreach ($rows as $row) {
         }
         .action {
             text-align: left;
-            margin-bottom: 20px;
-            white-space: pre-wrap;
+            margin-bottom: 20px; 
+            width: 80%;
+            text-align:center;
+            margin:0 auto
         }
         .dialog {
-            text-align: center;
-            margin: 0 auto 20px;
-            max-width: 50%;
+            margin: 0;
+            max-width: 95%;
             white-space: pre-wrap;
         }
         .checkbox-right {
@@ -89,14 +97,19 @@ foreach ($rows as $row) {
             background-color: #d4edda;
             border-left: 4px solid #28a745;
         }
-        .content-action.active, .dialog.active{
+        .action.active, .dialog.active{
             background:#d4edda
+        }
+        .b-red{
+            border:1px solid red
         }
     </style>
 </head>
 <body>
 
-    <a href="/film">Home</a>
+    <?php
+        include('header.php');
+    ?>
     <a href="/film/view_script.php?script_id=<?= $script_id ?>">Edit</a>
     <h1><?= htmlspecialchars($script['title']) ?></h1>
 
@@ -117,28 +130,26 @@ foreach ($rows as $row) {
                     ✅ <?= $done ?> dari <?= $total ?> selesai (<?= $percentage ?>%)
                 </div>
 
-                        <div class="scene-heading <?= $scene['is_completed'] ? 'active' : '' ?>" id="scene-heading-<?= $scene_id ?>">
-            <input type="checkbox" 
-                name="scene_done[<?= $scene_id ?>]" 
-                class="scene-checkbox" 
-                <?= $scene['is_completed'] ? 'checked' : '' ?>
-                data-scene-id="<?= $scene_id ?>">
-            SCENE <?= $scene['scene_number'] ?> : <?= $scene['scene_title'] ?>
-        </div>
-
-
-
+                <div class="scene-heading <?= $scene['is_completed'] ? 'active' : '' ?>" id="scene-heading-<?= $scene_id ?>">
+                    <input type="checkbox" 
+                        name="scene_done[<?= $scene_id ?>]" 
+                        class="scene-checkbox" 
+                        <?= $scene['is_completed'] ? 'checked' : '' ?>
+                        data-scene-id="<?= $scene_id ?>">
+                    SCENE <?= $scene['scene_number'] ?> : <?= $scene['scene_title'] ?>
+                </div>
                 <?php foreach ($scene['contents'] as $content): ?>
-                    <?php if ($content['type'] === 'paragraph'): ?>
-                        <div class="action">
+                    <?php if ($content['type'] === 'dialog'): ?>
+                        <div class="action <?= $content['is_completed'] ? 'active' : '' ?>">
                             <label>
                                 <input type="checkbox" name="content_done[<?= $content['id'] ?>]" <?= $content['is_completed'] ? 'checked' : '' ?>>
-                                <span class="content-action <?= $content['is_completed'] ? 'active' : '' ?>"><?= htmlspecialchars($content['text']) ?></span>
+                                <div class="content-action"><?= $content['text'] ?></div>
                             </label>
                         </div>
-                    <?php elseif ($content['type'] === 'dialog'): ?>
-                        <div class="dialog <?= $content['is_completed'] ? 'active' : '' ?>"><input type="checkbox" name="content_done[<?= $content['id'] ?>]" <?= $content['is_completed'] ? 'checked' : '' ?>> <?= htmlspecialchars($content['text']) ?></div>
+                    <?php elseif ($content['type'] === 'paragraph'): ?>
+                        <div class="dialog <?= $content['is_completed'] ? 'active' : '' ?>"><input type="checkbox" name="content_done[<?= $content['id'] ?>]" <?= $content['is_completed'] ? 'checked' : '' ?>> <?= $content['text'] ?></div>
                     <?php endif; ?>
+                    <hr class="b-red">
                 <?php endforeach; ?>
             </div>
         <?php endforeach; ?>
