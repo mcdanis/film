@@ -88,7 +88,6 @@ foreach ($rows as $row) {
         .dialog {
             margin: 0;
             max-width: 95%;
-            white-space: pre-wrap;
         }
         .checkbox-right {
             float: right;
@@ -110,7 +109,7 @@ foreach ($rows as $row) {
     <?php
         include('header.php');
     ?>
-    <a href="/film/view_script.php?script_id=<?= $script_id ?>">Edit</a>
+    <a href="<?= URL ?>/view_script.php?script_id=<?= $script_id ?>">Edit</a>
     <h1><?= htmlspecialchars($script['title']) ?></h1>
 
     <form action="save_status.php" method="post">

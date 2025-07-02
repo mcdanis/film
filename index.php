@@ -68,8 +68,8 @@ $scripts = $stmt->fetchAll();
                 <tr>
                     <td><?= htmlspecialchars($script['title']) ?></td>
                     <td>
-                        <a href="view_script_readonly.php?script_id=<?= $script['id'] ?>">Lihat</a> |
-                        <a href="delete_script.php?script_id=<?= $script['id'] ?>" onclick="return confirm('Yakin ingin menghapus skrip ini?')">Hapus</a>
+                        <a href="<?= URL ?>/view_script_readonly.php?script_id=<?= $script['id'] ?>">Lihat</a> |
+                        <a href="<?= URL ?>/delete_script.php?script_id=<?= $script['id'] ?>" onclick="return confirm('Yakin ingin menghapus skrip ini?')">Hapus</a>
                     </td>
                 </tr>
             <?php endforeach; ?>

@@ -76,6 +76,16 @@ foreach ($rows as $row) {
         .delete-btn:hover {
             background-color: #c82333;
         }
+
+        .summernote {
+            max-height: 400px;      /* tinggi maksimum */
+            overflow-y: auto;       /* scroll jika konten tinggi */
+            resize: none !important; /* nonaktifkan resize manual */
+        }
+        .note-editable {
+            max-height: 400px;      /* area editor summernote */
+            overflow-y: auto;
+        }
     </style>
 </head>
 <body>
@@ -87,12 +97,12 @@ foreach ($rows as $row) {
     <form id="sceneForm" action="save_script.php" method="post">
         <input type="hidden" name="script_id" value="<?= $script_id ?>">
         <div id="scenes">
-            <?php foreach ($scenes_data as $scene): ?>
+            <?php $no=1; foreach ($scenes_data as $scene): ?>
                 <div class="scene-block border-left border-primary" data-scene-id="<?= $scene['id'] ?>">
                     <div class="form-group">
                         <div class="d-flex justify-content-between align-items-center w-100">
                             <div class="w-75">
-                                <label class="w-100">Scene #
+                                <label class="w-100">Scene # <?= $no++; ?>
                                     <input type="text" class="form-control form-control-sm w-100" name="scene_title[]" value="<?= htmlspecialchars($scene['scene_title']) ?>" required>
                                 </label>
                                 <div class="form-check">
@@ -101,21 +111,34 @@ foreach ($rows as $row) {
                                 </div>
                             </div>
                             <div>
+                                <button type="button" class="btn btn-sm btn-link text-primary toggle-scene">Sembunyikan</button>
                                 <button type="button" class="btn btn-sm btn-danger delete-btn" onclick="deleteScene(this, <?= $scene['id'] ?>)">Hapus Scene</button>
                             </div>
                         </div>
                     </div>
 
+                    <!-- Preview scene -->
+                    <div class="scene-preview text-muted small my-2" style="display: none;"></div>
+
                     <div class="contents">
                         <?php foreach ($scene['contents'] as $content): ?>
-                            <div data-content-id="<?= $content['id'] ?>" class="mb-3">
-                                <textarea class="summernote form-control" name="content[<?= array_search($scene, array_values($scenes_data)) ?>][]" rows="2" required><?= htmlspecialchars($content['text']) ?></textarea>
-                                <input type="hidden" name="content_type[<?= array_search($scene, array_values($scenes_data)) ?>][]" value="<?= $content['type'] ?>">
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" name="content_completed[<?= array_search($scene, array_values($scenes_data)) ?>][]" value="<?= $content['id'] ?>" <?= $content['is_completed'] ? 'checked' : '' ?>>
-                                    <label class="form-check-label">Selesai</label>
+                            <div data-content-id="<?= $content['id'] ?>" class="mb-3 <?= $content['type'] == 'dialog' ? 'ml-5' : '' ?>">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <strong><?= ucfirst($content['type']) ?></strong>
+                                    <button type="button" class="btn btn-sm btn-link text-primary toggle-content">Sembunyikan</button>
                                 </div>
-                                <button type="button" class="btn btn-sm btn btn-outline-danger " onclick="deleteContent(this, <?= $content['id'] ?>)">Hapus</button>
+                                
+                                <div class="content-preview text-muted small my-2" style="display: none;"></div>
+                                
+                                <div class="content-body mt-2">
+                                    <textarea class="summernote form-control" name="content[<?= array_search($scene, array_values($scenes_data)) ?>][]" rows="2" required><?= htmlspecialchars($content['text']) ?></textarea>
+                                    <input type="hidden" name="content_type[<?= array_search($scene, array_values($scenes_data)) ?>][]" value="<?= $content['type'] ?>">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" name="content_completed[<?= array_search($scene, array_values($scenes_data)) ?>][]" value="<?= $content['id'] ?>" <?= $content['is_completed'] ? 'checked' : '' ?>>
+                                        <label class="form-check-label">Selesai</label>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteContent(this, <?= $content['id'] ?>)">Hapus</button>
+                                </div>
                             </div>
                             <hr>
                         <?php endforeach; ?>
@@ -269,6 +292,63 @@ document.addEventListener('DOMContentLoaded', updateFormIndexes);
 $(document).ready(function() {
   $('.summernote').summernote();
 });
+
+$(document).on('click', '.toggle-content', function () {
+    const $contentWrapper = $(this).closest('[data-content-id]');
+    const $body = $contentWrapper.find('.content-body');
+    const $preview = $contentWrapper.find('.content-preview');
+    const $btn = $(this);
+
+    if ($body.is(':visible')) {
+        // Mau disembunyikan → tampilkan preview
+        const html = $body.find('.summernote').summernote('code');
+        const text = $("<div>").html(html).text(); // hilangkan HTML
+        const cleanText = text.trim();
+        const previewText = cleanText.length > 200
+            ? cleanText.substring(0, 200) + '...'
+            : cleanText;
+
+        $preview.text(previewText).show();
+        $body.slideUp(200);
+        $btn.text('Tampilkan');
+    } else {
+        // Mau ditampilkan → sembunyikan preview
+        $preview.hide();
+        $body.slideDown(200);
+        $btn.text('Sembunyikan');
+    }
+});
+
+$(document).on('click', '.toggle-scene', function () {
+    const $sceneBlock = $(this).closest('.scene-block');
+    const $contents = $sceneBlock.find('.contents');
+    const $preview = $sceneBlock.find('.scene-preview');
+    const $btn = $(this);
+
+    if ($contents.is(':visible')) {
+        // Ambil semua teks dari summernote di dalam scene ini
+        let fullText = '';
+        $contents.find('.summernote').each(function () {
+            const html = $(this).summernote('code');
+            const plainText = $("<div>").html(html).text().trim();
+            if (plainText) {
+                fullText += plainText + '\n';
+            }
+        });
+
+        const cleanText = fullText.trim();
+        const previewText = 'Konten di sembunyikan...';
+
+        $preview.text(previewText).show();
+        $contents.slideUp(200);
+        $btn.text('Tampilkan');
+    } else {
+        $preview.hide();
+        $contents.slideDown(200);
+        $btn.text('Sembunyikan');
+    }
+});
+
 </script>
 
 </body>

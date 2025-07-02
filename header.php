@@ -1,5 +1,6 @@
+
 <ul>
     <li>
-        <a href="/film">Home</a>
+        <a href="<?= URL ?>">Home</a>
     </li>
 </ul>
